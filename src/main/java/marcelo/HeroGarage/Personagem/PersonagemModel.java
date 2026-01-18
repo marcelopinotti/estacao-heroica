@@ -27,7 +27,6 @@ public class PersonagemModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, name = "nome")
     private String nome;
     private String desenho;
     private int idade;
