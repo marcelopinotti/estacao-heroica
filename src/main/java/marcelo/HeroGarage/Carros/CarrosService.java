@@ -1,21 +1,26 @@
 package marcelo.HeroGarage.Carros;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class CarrosService {
 
-    private final CarrosRepository carrosRepository;
+    private CarrosRepository carrosRepository;
 
-    public List<CarrosModel> mostrarCarros(){
+    public CarrosService(CarrosRepository carrosRepository) {this.carrosRepository = carrosRepository;}
+
+    public CarrosModel criarCarros(CarrosModel carros) {
+        return carrosRepository.save(carros);
+    }
+
+    public List<CarrosModel> mostrarCarros() {
         return carrosRepository.findAll();
     }
-    public CarrosModel mostrarCarrosPorId(Long id){
+
+    public CarrosModel mostrarCarrosPorId(Long id) {
         Optional<CarrosModel> carrosID = carrosRepository.findById(id);
         return carrosID.orElse(null);
     }
