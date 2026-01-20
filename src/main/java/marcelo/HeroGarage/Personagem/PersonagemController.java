@@ -18,7 +18,7 @@ public class PersonagemController {
 
     public PersonagemController(PersonagemService personagemService) {this.personagemService = personagemService;}
 
-    // Adicionar personagem
+    // Adicionar personagens
     @PostMapping("/adicionar")
     public PersonagemModel criarPersonagem(@RequestBody PersonagemModel personagem){
         return personagemService.criarPersonagem(personagem);
@@ -35,9 +35,9 @@ public class PersonagemController {
     }
 
     //Atualizar personagem
-    @PutMapping("/atualizarId")  //TODO: Atualizar para receber o id como parametro
-    public String atualizarPersonagem(){
-        return "Personagem atualizado com sucesso";
+    @PutMapping("/atualizar/{id}")
+    public PersonagemModel atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemModel personagem){
+        return personagemService.atualizarPersonagem(personagem, id);
     }
 
     // Deletar personagem

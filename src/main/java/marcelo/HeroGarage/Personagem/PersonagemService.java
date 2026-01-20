@@ -12,7 +12,14 @@ public class PersonagemService {
 
     public PersonagemService(PersonagemRepository personagemRepository) {this.personagemRepository = personagemRepository;}
 
-    public PersonagemModel criarPersonagem(PersonagemModel personagem){return personagemRepository.save(personagem);}
+    public PersonagemModel criarPersonagem(PersonagemModel personagem) {
+        return personagemRepository.save(personagem);
+    }
+
+
+    public List<PersonagemModel> criarAlgunsPersonagens(List<PersonagemModel> personagens) {
+        return personagemRepository.saveAll(personagens);
+    }
 
 
     public List<PersonagemModel> mostrarPersonagem(){
@@ -23,6 +30,20 @@ public class PersonagemService {
     public PersonagemModel mostrarPersonagemPorId(Long id){
         Optional<PersonagemModel> personagemID = personagemRepository.findById(id);
         return personagemID.orElse(null);
+    }
+
+    public PersonagemModel atualizarPersonagem(PersonagemModel personagem, Long id) {
+        PersonagemModel personagemAtualizado = personagemRepository.existsById(id)
+                ? personagemRepository.findById(id).get() : null;
+        if (personagemAtualizado == null) {
+            return null;
+        } else {
+            personagemAtualizado.setNome(personagem.getNome());
+            personagemAtualizado.setDesenho(personagem.getDesenho());
+            personagemAtualizado.setIdade(personagem.getIdade());
+            personagemAtualizado.setGenero(personagem.getGenero());
+            return personagemRepository.save(personagemAtualizado);
+        }
     }
 
     public void deletarPersonagem(Long id){
