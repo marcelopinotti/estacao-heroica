@@ -24,8 +24,13 @@ public class CarrosService {
         return carrosMapper.map(carros);
     }
 
-    public List<CarrosModel> mostrarCarros() {
-        return carrosRepository.findAll();
+    public List<CarrosDTO> criarAlgunsCarros(List<CarrosDTO> carros) {
+        List<CarrosModel> carrosModel = carros.stream()
+                .map(carrosMapper::map)
+                .collect(Collectors.toList());
+        return carrosRepository.saveAll(carrosModel).stream()
+                .map(carrosMapper::map)
+                .collect(Collectors.toList());
     }
 
     public List<CarrosDTO> mostrarCarros() {

@@ -21,6 +21,9 @@ public class CarrosController {
         this.carrosService = carrosService;
     }
 
+    @PostMapping("/adicionar-varios")
+    public List<CarrosDTO> criarCarros(@RequestBody List<CarrosDTO> carros){return carrosService.criarAlgunsCarros(carros);}
+
     @PostMapping("/adicionar")
     public CarrosDTO criarCarros(@RequestBody CarrosDTO carros){return carrosService.criarCarros(carros);}
 
