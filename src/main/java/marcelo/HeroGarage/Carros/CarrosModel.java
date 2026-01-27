@@ -3,6 +3,8 @@ package marcelo.HeroGarage.Carros;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,9 +35,12 @@ public class CarrosModel {
     private String marca;
     private String modelo;
     private int ano;
+    @Column(name = "cor")
+    private String cor;
+    private String cambio;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Carro referencia Personagem, mas não controla o ciclo de vida dele
-    @JoinColumn(name = "personagem_id") // cria uma chave estrangeira
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "personagem_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // hibernateLazyInitializer para ignorar propriedades do Hibernate, e o handler para evitar problemas de serialização
     private PersonagemModel personagem;
 }

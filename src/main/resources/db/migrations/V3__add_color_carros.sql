@@ -1,0 +1,2 @@
+ALTER TABLE tb_carros
+ADD COLUMN cor VARCHAR(255);

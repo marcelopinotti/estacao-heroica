@@ -1,6 +1,7 @@
 package marcelo.HeroGarage.Personagem;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,6 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PersonagemModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

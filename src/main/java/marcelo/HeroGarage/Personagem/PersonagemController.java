@@ -2,9 +2,9 @@ package marcelo.HeroGarage.Personagem;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,23 +20,23 @@ public class PersonagemController {
 
     // Adicionar personagens
     @PostMapping("/adicionar")
-    public PersonagemModel criarPersonagem(@RequestBody PersonagemModel personagem){
+    public PersonagemDTO criarPersonagem(@RequestBody PersonagemDTO personagem){
         return personagemService.criarPersonagem(personagem);
     }
 
     // Mostrar personagem por id
     @GetMapping("/listar/{id}")
-    public PersonagemModel mostrarPersonagemPorId(@PathVariable Long id){return personagemService.mostrarPersonagemPorId(id);}
+    public PersonagemDTO mostrarPersonagemPorId(@PathVariable Long id){return personagemService.mostrarPersonagemPorId(id);}
 
     // Listar todos os personagens
     @GetMapping("/listar")
-    public List<PersonagemModel> mostrarPersonagem(){
+    public List<PersonagemDTO> mostrarPersonagem(){
         return personagemService.mostrarPersonagem();
     }
 
     //Atualizar personagem
-    @PutMapping("/atualizar/{id}")
-    public PersonagemModel atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemModel personagem){
+    @PatchMapping("/atualizar/{id}")
+    public PersonagemDTO atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemDTO personagem){
         return personagemService.atualizarPersonagem(personagem, id);
     }
 
