@@ -53,17 +53,31 @@ public class PersonagemService {
                 .orElse(null);
     }
 
-    public PersonagemModel atualizarPersonagem(PersonagemModel personagem, Long id) {
-        PersonagemModel personagemAtualizado = personagemRepository.existsById(id)
-                ? personagemRepository.findById(id).get() : null;
-        if (personagemAtualizado == null) {
-            return null;
-        } else {
-            personagemAtualizado.setNome(personagem.getNome());
-            personagemAtualizado.setDesenho(personagem.getDesenho());
-            personagemAtualizado.setIdade(personagem.getIdade());
-            personagemAtualizado.setGenero(personagem.getGenero());
-            return personagemRepository.save(personagemAtualizado);
+    public PersonagemDTO atualizarPersonagem(PersonagemDTO personagemDTO, Long id){
+        Optional<PersonagemModel> personagemId = personagemRepository.findById(id);
+        if (personagemId.isPresent()) {
+            PersonagemModel personagemAtualizado = personagemId.get();
+            setIfNotNull(personagemDTO.getNome(), personagemAtualizado::setNome);
+            setIfNotNull(personagemDTO.getDesenho(), personagemAtualizado::setDesenho);
+            setIfNotNull(personagemDTO.getIdade(), personagemAtualizado::setIdade);
+            setIfNotNull(personagemDTO.getGenero(), personagemAtualizado::setGenero);
+            if (personagemDTO.getCarros() != null) {
+                List<Long> carrosIds = personagemDTO.getCarros().stream()
+                        .map(CarrosModel::getId)
+                        .filter(idCarro -> idCarro != null)
+                        .collect(Collectors.toList());
+                List<CarrosModel> carros = carrosRepository.findAllById(carrosIds);
+                personagemAtualizado.setCarros(carros);
+            }
+            PersonagemModel personagemSalvo = personagemRepository.save(personagemAtualizado);
+            return personagemMapper.map(personagemSalvo);
+        }
+        return null;
+    }
+
+    private static <T> void atribuirNotNull(T valor, Consumer<T> setter) {
+        if (valor != null) {
+            setter.accept(valor);
         }
     }
 

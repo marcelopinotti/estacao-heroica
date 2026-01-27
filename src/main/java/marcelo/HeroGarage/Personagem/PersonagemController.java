@@ -2,6 +2,7 @@ package marcelo.HeroGarage.Personagem;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,8 +35,8 @@ public class PersonagemController {
     }
 
     //Atualizar personagem
-    @PutMapping("/atualizar/{id}")
-    public PersonagemModel atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemModel personagem){
+    @PatchMapping("/atualizar/{id}")
+    public PersonagemDTO atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemDTO personagem){
         return personagemService.atualizarPersonagem(personagem, id);
     }
 

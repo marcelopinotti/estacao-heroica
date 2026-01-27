@@ -40,6 +40,31 @@ public class CarrosService {
         return carrosID.map(carrosMapper::map)
                 .orElse(null);
     }
+
+    public CarrosDTO atualizarCarros(CarrosDTO carrosDTO, Long id){
+        Optional<CarrosModel> carrosId = carrosRepository.findById(id);
+        if (carrosId.isPresent()) {
+            CarrosModel carrosAtualizado = carrosId.get();
+            atribuirNotNull(carrosDTO.getNome(), carrosAtualizado::setNome);
+            atribuirNotNull(carrosDTO.getMarca(), carrosAtualizado::setMarca);
+            atribuirNotNull(carrosDTO.getModelo(), carrosAtualizado::setModelo);
+            atribuirNotNull(carrosDTO.getAno(), carrosAtualizado::setAno);
+            atribuirNotNull(carrosDTO.getPersonagem(), carrosAtualizado::setPersonagem);
+            atribuirNotNull(carrosDTO.getCambio(), carrosAtualizado::setCambio);
+            atribuirNotNull(carrosDTO.getCor(), carrosAtualizado::setCor);
+            CarrosModel carrosSalvo = carrosRepository.save(carrosAtualizado);
+            return carrosMapper.map(carrosSalvo);
+        }
+        return null;
+    }
+
+    private static <T> void atribuirNotNull(T valor, Consumer<T> setter) {
+        if (valor != null) {
+            setter.accept(valor);
+        }
+    }
+
+
     public void deletarCarros(Long id){
         carrosRepository.deleteById(id);
     }
