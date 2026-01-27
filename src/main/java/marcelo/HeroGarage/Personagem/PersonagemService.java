@@ -1,35 +1,56 @@
 package marcelo.HeroGarage.Personagem;
 
 
+import marcelo.HeroGarage.Carros.CarrosModel;
+import marcelo.HeroGarage.Carros.CarrosRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 @Service
 public class PersonagemService {
     private PersonagemRepository personagemRepository;
+    private PersonagemMapper personagemMapper;
+    private CarrosRepository carrosRepository;
 
-    public PersonagemService(PersonagemRepository personagemRepository) {this.personagemRepository = personagemRepository;}
+    public PersonagemService(PersonagemRepository personagemRepository, PersonagemMapper personagemMapper, CarrosRepository carrosRepository) {
+        this.personagemRepository = personagemRepository;
+        this.personagemMapper = personagemMapper;
+        this.carrosRepository = carrosRepository;
+    }
 
-    public PersonagemModel criarPersonagem(PersonagemModel personagem) {
-        return personagemRepository.save(personagem);
+    public PersonagemDTO criarPersonagem(PersonagemDTO personagemDTO) {
+        PersonagemModel personagem = personagemMapper.map(personagemDTO);
+        personagem = personagemRepository.save(personagem);
+        return personagemMapper.map(personagem);
     }
 
 
-    public List<PersonagemModel> criarAlgunsPersonagens(List<PersonagemModel> personagens) {
-        return personagemRepository.saveAll(personagens);
+    public List<PersonagemDTO> criarAlgunsPersonagens(List<PersonagemDTO> personagens) {
+        List<PersonagemModel> personagensModel = personagens.stream()
+                .map(personagemMapper::map)
+                .collect(Collectors.toList());
+        return personagemRepository.saveAll(personagensModel).stream()
+                .map(personagemMapper::map)
+                .collect(Collectors.toList());
     }
 
 
-    public List<PersonagemModel> mostrarPersonagem(){
-        return personagemRepository.findAll();
+    public List<PersonagemDTO> mostrarPersonagem(){
+        List<PersonagemModel> personagens = personagemRepository.findAll();
+        return personagens.stream()
+                .map(personagemMapper::map)
+                .collect(Collectors.toList());
     }
 
-    // listar por id
-    public PersonagemModel mostrarPersonagemPorId(Long id){
+
+    public PersonagemDTO mostrarPersonagemPorId(Long id){
         Optional<PersonagemModel> personagemID = personagemRepository.findById(id);
-        return personagemID.orElse(null);
+        return personagemID.map(personagemMapper::map)
+                .orElse(null);
     }
 
     public PersonagemModel atualizarPersonagem(PersonagemModel personagem, Long id) {
