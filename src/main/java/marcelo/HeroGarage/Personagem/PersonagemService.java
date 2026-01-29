@@ -5,10 +5,9 @@ import marcelo.HeroGarage.Carros.CarrosModel;
 import marcelo.HeroGarage.Carros.CarrosRepository;
 import org.springframework.stereotype.Service;
 import marcelo.HeroGarage.exception.IllegalArgumentException;
+import marcelo.HeroGarage.exception.PersonagemNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.function.Consumer;
 
 @Service
@@ -23,70 +22,76 @@ public class PersonagemService {
         this.carrosRepository = carrosRepository;
     }
 
-    public PersonagemDTO criarPersonagem(PersonagemDTO personagemDTO) {
+    public PersonagemDTO criar(PersonagemDTO personagemDTO) {
         PersonagemModel personagem = personagemMapper.map(personagemDTO);
         personagem = personagemRepository.save(personagem);
         return personagemMapper.map(personagem);
     }
 
-
-    public List<PersonagemDTO> criarAlgunsPersonagens(List<PersonagemDTO> personagens) {
+    public List<PersonagemDTO> criarLote(List<PersonagemDTO> personagens) {
         List<PersonagemModel> personagensModel = personagens.stream()
                 .map(personagemMapper::map)
-                .collect(Collectors.toList());
+                .toList();
         return personagemRepository.saveAll(personagensModel).stream()
                 .map(personagemMapper::map)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-
-    public List<PersonagemDTO> mostrarPersonagem(){
-        List<PersonagemModel> personagens = personagemRepository.findAll();
-        return personagens.stream()
+    public List<PersonagemDTO> listarTodos(){
+        return personagemRepository.findAll().stream()
                 .map(personagemMapper::map)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-
-    public PersonagemDTO mostrarPersonagemPorId(Long id){
-        Optional<PersonagemModel> personagemID = personagemRepository.findById(id);
-        return personagemID.map(personagemMapper::map)
-                .orElse(null);
+    public PersonagemDTO buscarPorId(Long id){
+        return personagemRepository.findById(id)
+                .map(personagemMapper::map)
+                .orElseThrow(() -> new PersonagemNotFoundException("Personagem não encontrado com o id: " + id));
     }
 
-    public PersonagemDTO atualizarPersonagem(PersonagemDTO personagemDTO, Long id){
-        Optional<PersonagemModel> personagemId = personagemRepository.findById(id);
-        if (personagemId.isPresent()) {
-            PersonagemModel personagemAtualizado = personagemId.get();
-            atribuirNotNull(personagemDTO.getNome(), personagemAtualizado::setNome);
-            atribuirNotNull(personagemDTO.getDesenho(), personagemAtualizado::setDesenho);
-            atribuirNotNull(personagemDTO.getIdade(), personagemAtualizado::setIdade);
-            atribuirNotNull(personagemDTO.getGenero(), personagemAtualizado::setGenero);
-            if (personagemDTO.getIdade() <= 0){
-                throw new IllegalArgumentException("Ano inválido:" + personagemDTO.getIdade());
-            }
-            if (personagemDTO.getCarros() != null) {
-                List<Long> carrosIds = personagemDTO.getCarros().stream()
-                        .map(CarrosModel::getId)
-                        .filter(idCarro -> idCarro != null)
-                        .collect(Collectors.toList());
-                List<CarrosModel> carros = carrosRepository.findAllById(carrosIds);
-                carros.forEach(carro -> carro.setPersonagem(personagemAtualizado));
-                personagemAtualizado.setCarros(carros);
-            }
-            PersonagemModel personagemSalvo = personagemRepository.save(personagemAtualizado);
-            return personagemMapper.map(personagemSalvo);
+    public PersonagemDTO atualizar(PersonagemDTO personagemDTO, Long id){
+        PersonagemModel personagemExistente = personagemRepository.findById(id)
+                .orElseThrow(() -> new PersonagemNotFoundException("Personagem não encontrado com o id: " + id));
+        atribuirSeNaoNulo(personagemDTO.getNome(), personagemExistente::setNome);
+        atribuirSeNaoNulo(personagemDTO.getDesenho(), personagemExistente::setDesenho);
+        atribuirSeNaoNulo(personagemDTO.getGenero(), personagemExistente::setGenero);
+        validarEAplicarIdade(personagemDTO.getIdade(), personagemExistente);
+        atualizarCarrosRelacionados(personagemDTO.getCarros(), personagemExistente);
+
+        PersonagemModel personagemSalvo = personagemRepository.save(personagemExistente);
+        return personagemMapper.map(personagemSalvo);
+    }
+    private void validarEAplicarIdade(Integer idade, PersonagemModel personagem) {
+        if (idade == null) return;
+        if (idade <= 0) {
+            throw new IllegalArgumentException("Idade inválida: " + idade);
         }
-        return null;
+        personagem.setIdade(idade);
     }
 
-    private static <T> void atribuirNotNull(T valor, Consumer<T> setter) {
+    private void atualizarCarrosRelacionados(List<CarrosModel> novosCarros, PersonagemModel personagem) {
+        if (novosCarros == null) return;
+
+        List<Long> ids = novosCarros.stream()
+                .map(CarrosModel::getId)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        List<CarrosModel> carros = carrosRepository.findAllById(ids);
+        carros.forEach(carro -> carro.setPersonagem(personagem));
+        personagem.setCarros(carros);
+    }
+
+    private static <T> void atribuirSeNaoNulo(T valor, Consumer<T> setter) {
         if (valor != null) {
             setter.accept(valor);
         }
     }
 
-    public void deletarPersonagem(Long id){
+    public void deletar(Long id){
+        if (!personagemRepository.existsById(id)) {
+            throw new PersonagemNotFoundException("Personagem não encontrado com o id: " + id);
+        }
         personagemRepository.deleteById(id);
     }
 

@@ -23,47 +23,40 @@ public class CarrosController {
         this.carrosService = carrosService;
     }
 
-    @PostMapping("/adicionar-varios")
-    public ResponseEntity<String> criarCarros(@RequestBody List<CarrosDTO> carros) {
-        List<CarrosDTO> carrosDTO = carrosService.criarAlgunsCarros(carros);
+    @PostMapping("/lote")
+    public ResponseEntity<String> criarLote(@RequestBody List<CarrosDTO> carros) {
+        List<CarrosDTO> carrosCriados = carrosService.criarLote(carros);
+        List<Long> ids = carrosCriados.stream().map(CarrosDTO::getId).toList();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Carros adicionados com sucesso! IDs deles: " +
-                        carrosDTO.stream()
-                                .map(CarrosDTO::getId)
-                                .toList());
+                .body("Carros adicionados com sucesso! IDs: " + ids);
     }
 
-    @PostMapping("/adicionar")
-    public ResponseEntity<String> criarCarros(@RequestBody CarrosDTO carros){
-        CarrosDTO carrosDTO = carrosService.criarCarros(carros);
+    @PostMapping("/criar")
+    public ResponseEntity<String> criar(@RequestBody CarrosDTO carro) {
+        CarrosDTO carroCriado = carrosService.criar(carro);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body("Carro criado com sucesso! ID: " + carrosDTO.getId());}
+                .body("Carro criado com sucesso! ID: " + carroCriado.getId());
+    }
 
     @GetMapping("/listar")
-    public ResponseEntity<List<CarrosDTO>>  mostrarCarros(){
-        List<CarrosDTO> carros = carrosService.mostrarCarros();
-        return ResponseEntity.ok(carros);
+    public ResponseEntity<List<CarrosDTO>> listarTodos() {
+        return ResponseEntity.ok(carrosService.listarTodos());
     }
 
-    @GetMapping("/listar/{id}")
-    public ResponseEntity<?> mostrarCarrosPorId(@PathVariable Long id) {
-        CarrosDTO carro = carrosService.mostrarCarrosPorId(id);
-        if (carro == null) {
-            throw new CarroNotFoundException("Carro não encontrado com o id: " + id);
-        }
-        return ResponseEntity.ok(carro);
+    @GetMapping("listar/{id}")
+    public ResponseEntity<CarrosDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(carrosService.buscarPorId(id));
     }
 
     @PatchMapping("atualizar/{id}")
-    public ResponseEntity<?> atualizarCarros(@PathVariable Long id, @RequestBody CarrosDTO carros){
-        return ResponseEntity.ok("Carro atualizado com sucesso! ID: " + carrosService.atualizarCarros(carros, id).getId());
+    public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody CarrosDTO carro) {
+        CarrosDTO carroAtualizado = carrosService.atualizar(carro, id);
+        return ResponseEntity.ok("Carro atualizado com sucesso! ID: " + carroAtualizado.getId());
     }
 
     @DeleteMapping("deletar/{id}")
-    public ResponseEntity<String> deletarCarros(@PathVariable Long id){
-        if(carrosService.mostrarCarrosPorId(id) != null) {
-            carrosService.deletarCarros(id);
-            return ResponseEntity.ok("Carro deletado com sucesso!");
-        } throw new CarroNotFoundException("Carro não encontrado.");
+    public ResponseEntity<String> deletar(@PathVariable Long id) {
+        carrosService.deletar(id);
+        return ResponseEntity.ok("Carro deletado com sucesso!");
     }
 }

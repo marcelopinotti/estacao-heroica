@@ -3,9 +3,8 @@ package marcelo.HeroGarage.Carros;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.function.Consumer;
+import marcelo.HeroGarage.exception.CarroNotFoundException;
 import marcelo.HeroGarage.exception.IllegalArgumentException;
 
 @Service
@@ -19,62 +18,65 @@ public class CarrosService {
         this.carrosMapper = carrosMapper;
     }
 
-    public CarrosDTO criarCarros(CarrosDTO carrosDTO) {
+    public CarrosDTO criar(CarrosDTO carrosDTO) {
         CarrosModel carros = carrosMapper.map(carrosDTO);
         carros = carrosRepository.save(carros);
         return carrosMapper.map(carros);
     }
 
-    public List<CarrosDTO> criarAlgunsCarros(List<CarrosDTO> carros) {
+    public List<CarrosDTO> criarLote(List<CarrosDTO> carros) {
         List<CarrosModel> carrosModel = carros.stream()
                 .map(carrosMapper::map)
-                .collect(Collectors.toList());
+                .toList();
         return carrosRepository.saveAll(carrosModel).stream()
                 .map(carrosMapper::map)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public List<CarrosDTO> mostrarCarros() {
-        List<CarrosModel> carros = carrosRepository.findAll();
-        return carros.stream()
+    public List<CarrosDTO> listarTodos() {
+        return carrosRepository.findAll().stream()
                 .map(carrosMapper::map)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public CarrosDTO mostrarCarrosPorId(Long id) {
-        Optional<CarrosModel> carrosID = carrosRepository.findById(id);
-        return carrosID.map(carrosMapper::map)
-                .orElse(null);
+    public CarrosDTO buscarPorId(Long id) {
+        return carrosRepository.findById(id)
+                .map(carrosMapper::map)
+                .orElseThrow(() -> new CarroNotFoundException("Carro não encontrado com o id: " + id));
     }
+    public CarrosDTO atualizar(CarrosDTO carrosDTO, Long id){
+        CarrosModel carroExistente = carrosRepository.findById(id)
+                .orElseThrow(() -> new CarroNotFoundException("Carro não encontrado com o id: " + id));
 
-    public CarrosDTO atualizarCarros(CarrosDTO carrosDTO, Long id){
-        Optional<CarrosModel> carrosId = carrosRepository.findById(id);
-        if (carrosId.isPresent()) {
-            CarrosModel carrosAtualizado = carrosId.get();
-            atribuirNotNull(carrosDTO.getNome(), carrosAtualizado::setNome);
-            atribuirNotNull(carrosDTO.getMarca(), carrosAtualizado::setMarca);
-            atribuirNotNull(carrosDTO.getModelo(), carrosAtualizado::setModelo);
-            atribuirNotNull(carrosDTO.getAno(), carrosAtualizado::setAno);
-            if (carrosDTO.getAno() <= 0){
-                throw new IllegalArgumentException("Ano inválido:" + carrosDTO.getAno());
-            }
-            atribuirNotNull(carrosDTO.getPersonagem(), carrosAtualizado::setPersonagem);
-            atribuirNotNull(carrosDTO.getCambio(), carrosAtualizado::setCambio);
-            atribuirNotNull(carrosDTO.getCor(), carrosAtualizado::setCor);
-            CarrosModel carrosSalvo = carrosRepository.save(carrosAtualizado);
-            return carrosMapper.map(carrosSalvo);
+        atribuirSeNaoNulo(carrosDTO.getNome(), carroExistente::setNome);
+        atribuirSeNaoNulo(carrosDTO.getMarca(), carroExistente::setMarca);
+        atribuirSeNaoNulo(carrosDTO.getModelo(), carroExistente::setModelo);
+        validarEAplicarAno(carrosDTO.getAno(), carroExistente);
+        atribuirSeNaoNulo(carrosDTO.getPersonagem(), carroExistente::setPersonagem);
+        atribuirSeNaoNulo(carrosDTO.getCambio(), carroExistente::setCambio);
+        atribuirSeNaoNulo(carrosDTO.getCor(), carroExistente::setCor);
+
+        CarrosModel carroSalvo = carrosRepository.save(carroExistente);
+        return carrosMapper.map(carroSalvo);
+    }
+    private void validarEAplicarAno(Integer ano, CarrosModel carro) {
+        if (ano == null) return;
+        if (ano <= 0) {
+            throw new IllegalArgumentException("Ano inválido: " + ano);
         }
-        return null;
+        carro.setAno(ano);
     }
 
-    private static <T> void atribuirNotNull(T valor, Consumer<T> setter) {
+    private static <T> void atribuirSeNaoNulo(T valor, Consumer<T> setter) {
         if (valor != null) {
             setter.accept(valor);
         }
     }
 
-
-    public void deletarCarros(Long id){
+    public void deletar(Long id){
+        if (!carrosRepository.existsById(id)) {
+            throw new CarroNotFoundException("Carro não encontrado com o id: " + id);
+        }
         carrosRepository.deleteById(id);
     }
 }
