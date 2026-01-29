@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import marcelo.HeroGarage.exception.*;
 import java.util.List;
 
 @RestController
@@ -49,8 +49,7 @@ public class CarrosController {
     public ResponseEntity<?> mostrarCarrosPorId(@PathVariable Long id) {
         CarrosDTO carro = carrosService.mostrarCarrosPorId(id);
         if (carro == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Carro não encontrado com o id: " + id);
+            throw new CarroNotFoundException("Carro não encontrado com o id: " + id);
         }
         return ResponseEntity.ok(carro);
     }
@@ -58,7 +57,7 @@ public class CarrosController {
     @PatchMapping("atualizar/{id}")
     public ResponseEntity<?> atualizarCarros(@PathVariable Long id, @RequestBody CarrosDTO carros){
         if (carrosService.mostrarCarrosPorId(id) == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Carro não encontrado com o id: " + id);
+            throw new CarroNotFoundException("Carro não encontrado com o id: " + id);
         }
         return ResponseEntity.ok("Carro atualizado com sucesso! ID: " + carrosService.atualizarCarros(carros, id).getId());
     }
@@ -68,6 +67,6 @@ public class CarrosController {
         if(carrosService.mostrarCarrosPorId(id) != null) {
             carrosService.deletarCarros(id);
             return ResponseEntity.ok("Carro deletado com sucesso!");
-        } return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Carro não encontrado.");
+        } throw new CarroNotFoundException("Carro não encontrado.");
     }
 }
