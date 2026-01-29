@@ -56,9 +56,6 @@ public class CarrosController {
 
     @PatchMapping("atualizar/{id}")
     public ResponseEntity<?> atualizarCarros(@PathVariable Long id, @RequestBody CarrosDTO carros){
-        if (carrosService.mostrarCarrosPorId(id) == null){
-            throw new CarroNotFoundException("Carro não encontrado com o id: " + id);
-        }
         return ResponseEntity.ok("Carro atualizado com sucesso! ID: " + carrosService.atualizarCarros(carros, id).getId());
     }
 

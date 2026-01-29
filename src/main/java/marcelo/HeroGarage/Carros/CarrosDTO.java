@@ -15,7 +15,7 @@ public class CarrosDTO {
     private String nome;
     private String marca;
     private String modelo;
-    private Integer ano;
+    private int ano;
     private PersonagemModel personagem;
     private String cambio;
     private String cor;

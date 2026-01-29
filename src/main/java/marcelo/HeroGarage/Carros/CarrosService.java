@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.function.Consumer;
+import marcelo.HeroGarage.exception.IllegalArgumentException;
 
 @Service
 public class CarrosService {
@@ -54,6 +55,9 @@ public class CarrosService {
             atribuirNotNull(carrosDTO.getMarca(), carrosAtualizado::setMarca);
             atribuirNotNull(carrosDTO.getModelo(), carrosAtualizado::setModelo);
             atribuirNotNull(carrosDTO.getAno(), carrosAtualizado::setAno);
+            if (carrosDTO.getAno() <= 0){
+                throw new IllegalArgumentException("Ano inválido:" + carrosDTO.getAno());
+            }
             atribuirNotNull(carrosDTO.getPersonagem(), carrosAtualizado::setPersonagem);
             atribuirNotNull(carrosDTO.getCambio(), carrosAtualizado::setCambio);
             atribuirNotNull(carrosDTO.getCor(), carrosAtualizado::setCor);
