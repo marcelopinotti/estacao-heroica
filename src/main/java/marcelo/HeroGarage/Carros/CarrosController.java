@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/carros")
 public class CarrosController {
 
-    private CarrosService carrosService;
+    private final CarrosService carrosService;
 
     public CarrosController(CarrosService carrosService) {
         this.carrosService = carrosService;
@@ -46,19 +46,19 @@ public class CarrosController {
     }
 
     @GetMapping("/listar/{id}")
-    public ResponseEntity<String> mostrarCarrosPorId(@PathVariable Long id) {
+    public ResponseEntity<?> mostrarCarrosPorId(@PathVariable Long id) {
         CarrosDTO carro = carrosService.mostrarCarrosPorId(id);
         if (carro == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Carro não encontrado com o id: " + id);
         }
-        return ResponseEntity.ok().body(carro.toString());
+        return ResponseEntity.ok(carro);
     }
 
     @PatchMapping("atualizar/{id}")
-    public ResponseEntity<String> atualizarCarros(@PathVariable Long id, @RequestBody CarrosDTO carros){
+    public ResponseEntity<?> atualizarCarros(@PathVariable Long id, @RequestBody CarrosDTO carros){
         if (carrosService.mostrarCarrosPorId(id) == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Carro não encontrado com o id: " + id + "");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Carro não encontrado com o id: " + id);
         }
         return ResponseEntity.ok("Carro atualizado com sucesso! ID: " + carrosService.atualizarCarros(carros, id).getId());
     }

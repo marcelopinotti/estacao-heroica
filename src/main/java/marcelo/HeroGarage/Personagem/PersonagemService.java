@@ -12,9 +12,9 @@ import java.util.function.Consumer;
 
 @Service
 public class PersonagemService {
-    private PersonagemRepository personagemRepository;
-    private PersonagemMapper personagemMapper;
-    private CarrosRepository carrosRepository;
+    private final PersonagemRepository personagemRepository;
+    private final PersonagemMapper personagemMapper;
+    private final CarrosRepository carrosRepository;
 
     public PersonagemService(PersonagemRepository personagemRepository, PersonagemMapper personagemMapper, CarrosRepository carrosRepository) {
         this.personagemRepository = personagemRepository;

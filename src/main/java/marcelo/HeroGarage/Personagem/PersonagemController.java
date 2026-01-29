@@ -1,5 +1,7 @@
 package marcelo.HeroGarage.Personagem;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,37 +16,56 @@ import java.util.List;
 @RestController
 @RequestMapping("/personagem")
 public class PersonagemController {
-    private PersonagemService personagemService;
+    private final PersonagemService personagemService;
 
-    public PersonagemController(PersonagemService personagemService) {this.personagemService = personagemService;}
+    public PersonagemController(PersonagemService personagemService) {
+        this.personagemService = personagemService;
+    }
 
-    // Adicionar personagens
     @PostMapping("/adicionar")
-    public PersonagemDTO criarPersonagem(@RequestBody PersonagemDTO personagem){
-        return personagemService.criarPersonagem(personagem);
+    public ResponseEntity<String> criarPersonagem(@RequestBody PersonagemDTO personagem) {
+        PersonagemDTO personagemDTO = personagemService.criarPersonagem(personagem);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Personagem criado com sucesso! ID: " + personagemDTO.getId());
     }
 
-    // Mostrar personagem por id
+    @PostMapping("/adicionar-varios")
+    public ResponseEntity<?> criarPersonagem(@RequestBody List<PersonagemDTO> personagem) {
+        List<PersonagemDTO> personagemDTO = personagemService.criarAlgunsPersonagens(personagem);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Personagens adicionados com sucesso! IDs deles: " +
+                        personagemDTO.stream()
+                                .map(PersonagemDTO::getId)
+                                .toList());
+    }
+
     @GetMapping("/listar/{id}")
-    public PersonagemDTO mostrarPersonagemPorId(@PathVariable Long id){return personagemService.mostrarPersonagemPorId(id);}
+    public ResponseEntity<?> mostrarPersonagemPorId(@PathVariable Long id) {
+        PersonagemDTO personagem = personagemService.mostrarPersonagemPorId(id);
+        if (personagem == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Personagem não encontrado com o id: " + id);
+        }
+        return ResponseEntity.ok(personagem);
+    }
 
-    // Listar todos os personagens
     @GetMapping("/listar")
-    public List<PersonagemDTO> mostrarPersonagem(){
-        return personagemService.mostrarPersonagem();
+    public ResponseEntity<List<PersonagemDTO>> mostrarPersonagem() {
+        return ResponseEntity.ok(personagemService.mostrarPersonagem());
     }
 
-    //Atualizar personagem
     @PatchMapping("/atualizar/{id}")
-    public PersonagemDTO atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemDTO personagem){
-        return personagemService.atualizarPersonagem(personagem, id);
+    public ResponseEntity<String> atualizarPersonagem(@PathVariable Long id, @RequestBody PersonagemDTO personagem) {
+        if (personagemService.mostrarPersonagemPorId(id) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Personagem não encontrado com o id: " + id);
+        }
+        return ResponseEntity.ok("Personagem atualizado com sucesso! Id: " + personagemService.atualizarPersonagem(personagem, id).getId());
     }
 
-    // Deletar personagem
     @DeleteMapping("/deletar/{id}")
-    public void deletarPersonagem(@PathVariable Long id){
-        personagemService.deletarPersonagem(id);
+    public ResponseEntity<String> deletarPersonagem(@PathVariable Long id) {
+        if (personagemService.mostrarPersonagemPorId(id) != null) {
+            personagemService.deletarPersonagem(id);
+            return ResponseEntity.ok("Personagem deletado com sucesso!");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Personagem não encontrado.");
     }
-
 }
-
